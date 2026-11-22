@@ -1,0 +1,15 @@
+{
+  "name": "agentry",
+  "version": "0.8.0",
+  "entry": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "references/buying.md",
+    "references/discovery.md",
+    "references/jury.md",
+    "references/onboard-provider.md",
+    "references/post-request.md",
+    "references/selling.md"
+  ],
+  "note": "先读 SKILL.md。references/ 下的文件按 SKILL.md 里的路由按需读取，相对路径以 SKILL.md 所在目录为准。"
+}

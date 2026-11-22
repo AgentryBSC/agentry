@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+</head><body style="margin:0;background:#131209">
+<canvas id="c" width="1600" height="900"></canvas>
+<script>
+const W = 1600, H = 900;
+const C = { bg: "#131209", gold: "#F0B90B", ink: "#F2F0EA", muted: "#8F8B80", card: "#1C1B14", line: "rgba(242,240,234,0.10)" };
+const SANS = "Geist, 'Microsoft YaHei', sans-serif", MONO = "'Geist Mono', Consolas, monospace";
+const x = document.getElementById("c").getContext("2d");
+function text(s, X, Y, o) {
+  o = o || {}; x.font = (o.w || 500) + " " + (o.s || 32) + "px " + (o.mono ? MONO : SANS);
+  x.fillStyle = o.c || C.ink; x.textAlign = o.a || "left"; x.textBaseline = "alphabetic"; x.fillText(s, X, Y);
+  return x.measureText(s).width;
+}
+function rr(X, Y, w, h, r) { x.beginPath(); x.roundRect(X, Y, w, h, r); }
+function mark(cx, cy, size) {
+  const s = size / 64; x.save(); x.translate(cx - 32 * s, cy - 32 * s); x.scale(s, s);
+  x.strokeStyle = C.gold; x.lineWidth = 7; x.lineCap = "round";
+  x.beginPath(); x.moveTo(14, 54); x.lineTo(14, 28); x.arc(32, 28, 18, Math.PI, 0); x.lineTo(50, 54); x.stroke();
+  x.fillStyle = C.gold; x.beginPath(); x.arc(32, 39, 7, 0, Math.PI * 2); x.fill(); x.restore();
+}
+function pill(s, X, Y, filled) {
+  x.font = "500 24px " + SANS; const w = x.measureText(s).width + 36;
+  rr(X, Y, w, 44, 22);
+  if (filled) { x.fillStyle = "rgba(240,185,11,0.12)"; x.fill(); }
+  x.strokeStyle = "rgba(240,185,11,0.45)"; x.lineWidth = 1.5; x.stroke();
+  text(s, X + 18, Y + 30, { s: 24, c: C.gold });
+  return w;
+}
+
+async function draw() {
+  await document.fonts.load("600 64px Geist"); await document.fonts.load("500 32px 'Geist Mono'"); await document.fonts.ready;
+  x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+  x.fillStyle = "rgba(242,240,234,0.05)";
+  for (let gx = 24; gx < W; gx += 48) for (let gy = 24; gy < H; gy += 48) { x.beginPath(); x.arc(gx, gy, 1.4, 0, Math.PI * 2); x.fill(); }
+
+  // 左上品牌
+  mark(104, 108, 56);
+  text("Agentry", 148, 122, { s: 40, w: 600 });
+
+  // 左侧文案
+  const L = 80;
+  let px = L; px += pill("首个服务上线", px, 220, true) + 12; pill("即时交付服务", px, 220);
+  text("Agentry 水龙头", L, 360, { s: 88, w: 600 });
+  text("让你的 Agent 用一笔交易领取代币", L, 440, { s: 44, c: C.muted });
+
+  // 金额
+  text("100,000", L, 600, { s: 132, w: 600, c: C.gold });
+  const nw = (x.font = "600 132px " + SANS, x.measureText("100,000").width);
+  text("Agentry", L + nw + 24, 598, { s: 48, w: 600 });
+
+  // 底部信息条
+  x.fillStyle = C.line; x.fillRect(L, 680, 760, 2);
+  const facts = [["领取方式", "Agent 调用即到账"], ["费用", "免费，仅需 gas"], ["限制", "每个 ID 限领一次"]];
+  facts.forEach(([k, v], i) => {
+    const X = L + i * 260;
+    text(k, X, 732, { s: 22, c: C.muted });
+    text(v, X, 772, { s: 26, w: 500 });
+  });
+  text("agentrys.fun", L, 850, { s: 26, c: C.gold, mono: true });
+
+  // 右侧：水龙头 → 水滴 → Agent ID 卡
+  const cx = 1230;
+  x.save();
+  x.strokeStyle = C.gold; x.lineWidth = 10; x.lineCap = "round"; x.lineJoin = "round";
+  // 墙上的管道与龙头
+  rr(1340, 150, 60, 120, 14); x.fillStyle = C.card; x.fill(); x.lineWidth = 3; x.strokeStyle = "rgba(240,185,11,0.5)"; x.stroke();
+  x.lineWidth = 34; x.strokeStyle = C.gold;
+  x.beginPath(); x.moveTo(1340, 210); x.lineTo(cx + 20, 210); x.quadraticCurveTo(cx - 20, 210, cx - 20, 250); x.lineTo(cx - 20, 268); x.stroke();
+  // 阀门把手
+  x.lineWidth = 12; x.beginPath(); x.moveTo(1270, 192); x.lineTo(1270, 150); x.stroke();
+  x.beginPath(); x.moveTo(1236, 146); x.lineTo(1304, 146); x.stroke();
+  x.restore();
+  // 落下的代币
+  [[322, 1, 22], [394, 0.75, 20], [460, 0.5, 18]].forEach(([y, a, r]) => {
+    x.save(); x.globalAlpha = a;
+    x.beginPath(); x.arc(cx - 20, y, r, 0, Math.PI * 2); x.fillStyle = C.gold; x.fill();
+    x.beginPath(); x.arc(cx - 20, y, r - 7, 0, Math.PI * 2); x.strokeStyle = "rgba(19,18,9,0.45)"; x.lineWidth = 3; x.stroke();
+    x.restore();
+  });
+  // Agent ID 卡
+  const kx = 1000, ky = 520, kw = 460, kh = 260;
+  rr(kx, ky, kw, kh, 24); x.fillStyle = C.card; x.fill(); x.strokeStyle = "rgba(240,185,11,0.4)"; x.lineWidth = 2; x.stroke();
+  mark(kx + 64, ky + 70, 52);
+  text("Agent ID", kx + 108, ky + 70, { s: 34, w: 600 });
+  text("一个 ID · 一次领取", kx + 108, ky + 104, { s: 22, c: C.muted });
+  x.fillStyle = C.line; x.fillRect(kx + 36, ky + 140, kw - 72, 2);
+  text("到账", kx + 36, ky + 210, { s: 26, c: C.muted });
+  text("+100,000", kx + kw - 36, ky + 212, { s: 44, w: 600, c: C.gold, a: "right" });
+
+  const b = await new Promise((r) => document.getElementById("c").toBlob(r, "image/png"));
+  await fetch("/still?t=faucet-poster", { method: "POST", body: b });
+  await fetch("/done", { method: "POST", body: "ok" });
+}
+draw().catch((e) => fetch("/error", { method: "POST", body: String(e.stack || e) }));
+</script></body></html>

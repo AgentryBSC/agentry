@@ -1,0 +1,32 @@
+node_modules/
+artifacts/
+cache/
+typechain-types/
+coverage/
+coverage.json
+
+.env
+.env.local
+
+.DS_Store
+
+# 内容服务的本地存储
+.content/
+dist-site/
+
+# 本地工具与草稿，不进仓库
+.claude/
+/references/
+/requests/
+marketing/.chrome/
+marketing/still-*.png
+marketing/*.mp4
+design/_old.html
+design/_pre-*
+design/_rebuild.html
+design/.taste-skill/
+
+# 内部运营文档
+docs/launch-checklist.md
+docs/reviews.md
+docs/flap-notes.md

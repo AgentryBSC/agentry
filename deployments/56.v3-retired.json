@@ -1,0 +1,77 @@
+{
+  "chainId": 56,
+  "network": "bsc",
+  "deployedAt": "2026-11-21T08:01:37.288Z",
+  "deployer": "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3",
+  "factory": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+  "contracts": {
+    "AgentMarket": {
+      "address": "0xF21a49A4CAf31AAF3b8c286c87A37e6B4ffc5e6E",
+      "proxy": true,
+      "implementation": "0x00EBD88568606727C9b195dD3571bAE1A89101D8",
+      "implementationArgs": [
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+        "0x55d398326f99059fF775485246999027B3197955"
+      ]
+    },
+    "AgentJury": {
+      "address": "0xFaE29b1C353daEa7111559cF2d2677ec13DB1Aa7",
+      "proxy": true,
+      "implementation": "0x5841De86BBBF156F7d4DadD9bE7647dED745C8a9",
+      "implementationArgs": [
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+        "0x55d398326f99059fF775485246999027B3197955",
+        "0xF21a49A4CAf31AAF3b8c286c87A37e6B4ffc5e6E"
+      ]
+    },
+    "Timelock": {
+      "address": "0x6Ef764949D233E9d28a0b7860dEC05964D37664D",
+      "delay": 172800,
+      "constructorArgs": [
+        "172800",
+        "[0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3]",
+        "[0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3]",
+        "0x0000000000000000000000000000000000000000"
+      ]
+    },
+    "AgentryServiceVault": {
+      "address": "0xeD681eb4283A4b3D1dc88d134e06b949D868A4c8",
+      "constructorArgs": [
+        "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3"
+      ],
+      "salt": "0xf6f3f9983ffdef0bbad21456b37cb06d66c6ff89e2507c4d7068508d09746e69"
+    },
+    "AgentryFaucet": {
+      "address": "0x86044508665cbE7eA2a2d59457DC514Cffa16C68",
+      "constructorArgs": [
+        "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3",
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f"
+      ],
+      "salt": "0x4bed7fe1b1562be5e4625fc6a7d7dc1d1d11cbcf5f33406bd3e33b3eac43783f"
+    }
+  },
+  "dependencies": {
+    "agentId": "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+    "paymentToken": "0x55d398326f99059fF775485246999027B3197955",
+    "mocked": false
+  },
+  "params": {
+    "maxNative": "1000000000000000000",
+    "maxToken": "600000000000000000000",
+    "claimWindow": "604800",
+    "reviewWindow": "259200",
+    "minDelivery": "86400",
+    "maxDelivery": "604800",
+    "juryFeeBps": "500",
+    "votingWindow": "172800",
+    "quorum": "3",
+    "stakeNative": "2000000000000000",
+    "stakeToken": "1000000000000000000"
+  },
+  "retiredVaults": [
+    {
+      "address": "0x646689b62F2ef16DBFa036f031695401fD921d98",
+      "retiredAt": "2026-11-21T10:30:51.460Z"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "data": {
+    "requestId": "c8cb5b0431d54d86805148898cef4f12",
+    "parsedTx": {
+      "transactionType": "ContractInteraction",
+      "action": "0xf8293a36",
+      "contractAddress": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+      "contractAddressList": null,
+      "transactionTypeTranslationKey": null
+    },
+    "simulationResult": {
+      "gasTokenFromData": 0,
+      "balanceChanges": [],
+      "simulationErrorDetail": null,
+      "simulationCode": "000000000",
+      "preCheckCode": "",
+      "authorityChanges": [],
+      "allowanceChanges": []
+    },
+    "risks": {
+      "addresses": {},
+      "riskDetails": [],
+      "riskBehaviors": []
+    },
+    "tokenInfos": {},
+    "requireConfirmation": false,
+    "expiresAt": 1795263620840,
+    "gasLimit": 6435426
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "chainId": 56,
+  "network": "bsc",
+  "deployedAt": "2026-11-20T13:46:29.896Z",
+  "deployer": "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3",
+  "factory": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+  "contracts": {
+    "AgentMarket": {
+      "address": "0x775d56EB2D99081347E38c717B0df1A703b26049",
+      "constructorArgs": [
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+        "0x55d398326f99059fF775485246999027B3197955",
+        "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3",
+        "1000000000000000000",
+        "600000000000000000000",
+        "604800",
+        "259200",
+        "86400",
+        "604800",
+        "500"
+      ]
+    },
+    "AgentJury": {
+      "address": "0xf2546bA8260D0Cd4b2638E5D7175BD682989cDfc",
+      "constructorArgs": [
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+        "0x55d398326f99059fF775485246999027B3197955",
+        "0x775d56EB2D99081347E38c717B0df1A703b26049",
+        "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3",
+        "172800",
+        "3",
+        "2000000000000000",
+        "1000000000000000000"
+      ]
+    },
+    "AgentryServiceVault": {
+      "address": "0x646689b62F2ef16DBFa036f031695401fD921d98",
+      "constructorArgs": [
+        "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3"
+      ]
+    }
+  },
+  "dependencies": {
+    "agentId": "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+    "paymentToken": "0x55d398326f99059fF775485246999027B3197955",
+    "mocked": false
+  },
+  "params": {
+    "maxNative": "1000000000000000000",
+    "maxToken": "600000000000000000000",
+    "claimWindow": "604800",
+    "reviewWindow": "259200",
+    "minDelivery": "86400",
+    "maxDelivery": "604800",
+    "juryFeeBps": "500",
+    "votingWindow": "172800",
+    "quorum": "3",
+    "stakeNative": "2000000000000000",
+    "stakeToken": "1000000000000000000"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "chainId": 56,
+  "network": "bsc",
+  "deployedAt": "2026-11-21T12:31:09.862Z",
+  "deployer": "0x5F92D38F51D4E551cd27dCB147f0d6E4Cd683cb5",
+  "factory": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+  "contracts": {
+    "AgentMarket": {
+      "address": "0xeF2adb1F1071bcaD7f280C3E6Fa106bC7db2486b",
+      "proxy": true,
+      "implementation": "0xA590b8c370eC28E02d78f2Ed24Ad7eC03FB71c1A",
+      "implementationArgs": [
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+        "0x55d398326f99059fF775485246999027B3197955"
+      ]
+    },
+    "AgentJury": {
+      "address": "0x8f01ef67497ea27e222cEa702c0d3244b430FbD2",
+      "proxy": true,
+      "implementation": "0xfFCcd2d032b52c2f980A431428C47fC60cD66b97",
+      "implementationArgs": [
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+        "0x55d398326f99059fF775485246999027B3197955",
+        "0xeF2adb1F1071bcaD7f280C3E6Fa106bC7db2486b"
+      ]
+    },
+    "AgentryServiceRouter": {
+      "address": "0x986694Baeb3E57A7b5caef47E6eE274Dcd11D308",
+      "constructorArgs": [
+        "0xeF2adb1F1071bcaD7f280C3E6Fa106bC7db2486b",
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f"
+      ]
+    },
+    "Timelock": {
+      "address": "0x665e6cAb9ea21Ef9DFD3440aeB238cBB4cdBe6D1",
+      "delay": 172800,
+      "constructorArgs": [
+        "172800",
+        "[0x5F92D38F51D4E551cd27dCB147f0d6E4Cd683cb5]",
+        "[0x5F92D38F51D4E551cd27dCB147f0d6E4Cd683cb5]",
+        "0x0000000000000000000000000000000000000000"
+      ]
+    },
+    "AgentryServiceVault": {
+      "address": "0xeD681eb4283A4b3D1dc88d134e06b949D868A4c8",
+      "constructorArgs": [
+        "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3"
+      ],
+      "salt": "0xf6f3f9983ffdef0bbad21456b37cb06d66c6ff89e2507c4d7068508d09746e69"
+    },
+    "AgentryFaucet": {
+      "address": "0x8aCe87A330A2d618832C11eFE29E8B86A96E675E",
+      "constructorArgs": [
+        "0x7c70c1CF10D420c8A4a9eF3488617E766b24bDB3",
+        "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+        "0x986694Baeb3E57A7b5caef47E6eE274Dcd11D308"
+      ],
+      "salt": "0x43993a58ea2c806bcf15452c248c5f640881c4da33b86d61c3af81901a8daa20"
+    }
+  },
+  "dependencies": {
+    "agentId": "0x60b9262456de011f7d15a54cdd8c48baaa8b022f",
+    "paymentToken": "0x55d398326f99059fF775485246999027B3197955",
+    "mocked": false
+  },
+  "params": {
+    "maxNative": "1000000000000000000",
+    "maxToken": "600000000000000000000",
+    "claimWindow": "604800",
+    "reviewWindow": "259200",
+    "minDelivery": "86400",
+    "maxDelivery": "604800",
+    "juryFeeBps": "500",
+    "votingWindow": "172800",
+    "quorum": "3",
+    "stakeNative": "2000000000000000",
+    "stakeToken": "1000000000000000000"
+  }
+}

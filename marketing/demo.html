@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Agentry 产品演示</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="node_modules/mp4-muxer/build/mp4-muxer.js"></script>
+<style>body{margin:0;background:#131209}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/* Agentry 产品演示，60 秒。画面用线上站点 agentrys.fun 的真实截图（demo/*.png） */
+const W = 1920, H = 1080, FPS = 30, DUR = 60;
+const C = { bg: "#131209", gold: "#F0B90B", ink: "#F2F0EA", muted: "#8F8B80", line: "rgba(242,240,234,0.10)", card: "#1C1B14", ok: "#7FD28A" };
+const SANS = "Geist, 'Microsoft YaHei', 'PingFang SC', sans-serif";
+const MONO = "'Geist Mono', Consolas, 'Microsoft YaHei', monospace";
+const cv = document.getElementById("c"), x = cv.getContext("2d");
+const IMG = {};
+
+const clamp = (v) => Math.max(0, Math.min(1, v));
+const easeOut = (v) => 1 - Math.pow(1 - clamp(v), 4);
+const easeInOut = (v) => { v = clamp(v); return v < 0.5 ? 8 * v ** 4 : 1 - Math.pow(-2 * v + 2, 4) / 2; };
+const p = (t, s, d) => clamp((t - s) / d);
+const lerp = (a, b, k) => a + (b - a) * k;
+
+const SCENES = [
+  [0, 5, sIntro],
+  [5, 13, sAgentId],
+  [13, 22, sMarket],
+  [22, 35, sFaucet],
+  [35, 45, sOrder],
+  [45, 52, sProvider],
+  [52, 57, sSafety],
+  [57, 60, sOutro],
+];
+
+function font(w, s, mono) { x.font = w + " " + s + "px " + (mono ? MONO : SANS); }
+function text(str, X, Y, o) {
+  o = o || {};
+  font(o.w || 500, o.s || 32, o.mono);
+  x.fillStyle = o.c || C.ink; x.textAlign = o.a || "center"; x.textBaseline = "middle";
+  x.fillText(str, X, Y);
+}
+function rr(X, Y, w, h, r) { x.beginPath(); x.roundRect(X, Y, w, h, r); }
+function enter(t, s, fn, dist) {
+  const k = easeOut(p(t, s, 0.8));
+  if (k <= 0) return;
+  x.save(); x.globalAlpha *= k; x.translate(0, (1 - k) * (dist || 32)); fn(); x.restore();
+}
+function mark(cx, cy, size, t0, t) {
+  const s = size / 64;
+  x.save(); x.translate(cx - 32 * s, cy - 32 * s); x.scale(s, s);
+  const len = 26 + Math.PI * 18 + 26, k = easeInOut(p(t, t0, 1.2));
+  x.strokeStyle = C.gold; x.lineWidth = 7; x.lineCap = "round";
+  x.setLineDash([len, len]); x.lineDashOffset = len * (1 - k);
+  x.beginPath(); x.moveTo(14, 54); x.lineTo(14, 28); x.arc(32, 28, 18, Math.PI, 0); x.lineTo(50, 54); x.stroke();
+  x.setLineDash([]);
+  const d = easeOut(p(t, t0 + 0.9, 0.6));
+  x.fillStyle = C.gold; x.beginPath(); x.arc(32, 39, 7 * d, 0, Math.PI * 2); x.fill();
+  x.restore();
+}
+function bgGrid(t) {
+  x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+  x.fillStyle = "rgba(242,240,234,0.05)";
+  const off = (t * 6) % 48;
+  for (let gx = -48; gx < W + 48; gx += 48) for (let gy = 0; gy < H + 48; gy += 48) { x.beginPath(); x.arc(gx + off, gy, 1.4, 0, Math.PI * 2); x.fill(); }
+}
+function kicker(str, X, Y, t, s, a) {
+  enter(t, s, () => {
+    font(500, 22, true);
+    const w = x.measureText(str).width + 36, L = a === "left" ? X : X - w / 2;
+    rr(L, Y - 20, w, 40, 20); x.strokeStyle = "rgba(240,185,11,0.45)"; x.lineWidth = 1.5; x.stroke();
+    text(str, L + w / 2, Y + 1, { s: 22, c: C.gold, mono: true });
+  });
+}
+// 底部字幕条
+function caption(str, t, s) {
+  enter(t, s, () => {
+    font(500, 34);
+    const w = x.measureText(str).width + 64;
+    rr(W / 2 - w / 2, 990, w, 64, 32); x.fillStyle = "rgba(19,18,9,0.88)"; x.fill();
+    x.strokeStyle = "rgba(240,185,11,0.3)"; x.lineWidth = 1.5; x.stroke();
+    text(str, W / 2, 1023, { s: 34 });
+  }, 16);
+}
+// 截图镜头：把图片 (cx,cy) 为中心、缩放 z 的区域画进 rect
+let camR = null;
+function cam(img, R, cx, cy, z) {
+  const sw = R.w / z, sh = R.h / z; camR = R;
+  x.save(); rr(R.x, R.y, R.w, R.h, 18); x.clip();
+  x.fillStyle = "#0b0b08"; x.fillRect(R.x, R.y, R.w, R.h);
+  x.drawImage(img, cx - sw / 2, cy - sh / 2, sw, sh, R.x, R.y, R.w, R.h);
+  x.restore();
+  rr(R.x, R.y, R.w, R.h, 18); x.strokeStyle = "rgba(242,240,234,0.16)"; x.lineWidth = 2; x.stroke();
+  return (ix, iy) => [R.x + (ix - (cx - sw / 2)) * z, R.y + (iy - (cy - sh / 2)) * z];
+}
+// 在截图坐标上框出重点
+function spot(map, z, ix, iy, iw, ih, k) {
+  if (k <= 0) return;
+  const [X, Y] = map(ix, iy);
+  x.save(); rr(camR.x, camR.y, camR.w, camR.h, 18); x.clip(); x.globalAlpha *= k;
+  rr(X - 8, Y - 8, iw * z + 16, ih * z + 16, 14);
+  x.strokeStyle = C.gold; x.lineWidth = 4; x.shadowColor = C.gold; x.shadowBlur = 18; x.stroke();
+  x.restore();
+}
+// 浏览器外框
+function browser(R, url) {
+  rr(R.x, R.y - 48, R.w, R.h + 48, 20); x.fillStyle = "#1A1912"; x.fill();
+  x.strokeStyle = "rgba(242,240,234,0.12)"; x.lineWidth = 2; x.stroke();
+  ["#5b5a52", "#5b5a52", "#5b5a52"].forEach((c, i) => { x.fillStyle = c; x.beginPath(); x.arc(R.x + 28 + i * 22, R.y - 24, 6, 0, Math.PI * 2); x.fill(); });
+  rr(R.x + 110, R.y - 38, 560, 28, 14); x.fillStyle = "#24231B"; x.fill();
+  text(url, R.x + 130, R.y - 24, { s: 17, c: C.muted, mono: true, a: "left" });
+}
+
+/* ---------- 1 开场 0–5 ---------- */
+function sIntro(t) {
+  mark(W / 2, 360, 180, 0.2, t);
+  enter(t, 1.2, () => text("Agentry", W / 2, 560, { s: 120, w: 600 }));
+  enter(t, 1.8, () => text("BNB Chain 上基于 Agent ID 的 Agent 服务市场", W / 2, 670, { s: 44, c: C.muted }));
+  kicker("产品演示 · 60s", W / 2, 790, t, 2.4);
+}
+
+/* ---------- 2 Agent ID 5–13 ---------- */
+function sAgentId(t) {
+  t -= 5;
+  // 右：首页上的 Agent ID 卡（真实截图）
+  enter(t, 0.2, () => {
+    const R = { x: 1120, y: 150, w: 560, h: 760 };
+    const z = lerp(1.06, 1.14, easeInOut(p(t, 0, 8)));
+    cam(IMG.home, R, 1336, 553, z);
+  });
+  kicker("Agent ID", 200, 200, t, 0, "left");
+  enter(t, 0.3, () => text("一个 Agent ID，就是你的账号", 200, 290, { s: 64, w: 600, a: "left" }));
+  const rows = [
+    ["身份", "市场合约在链上核验调用方是否持有 Agent ID", 1.2],
+    ["签名", "每笔交易都在你自己的 Agent ID 钱包里确认", 2.2],
+    ["信誉", "订单、评价、逾期、争议都记在这个 ID 上", 3.2],
+  ];
+  rows.forEach(([h, d, s], i) => enter(t, s, () => {
+    const Y = 440 + i * 150;
+    rr(200, Y - 50, 820, 116, 18); x.fillStyle = C.card; x.fill(); x.strokeStyle = C.line; x.lineWidth = 2; x.stroke();
+    text(h, 240, Y - 6, { s: 34, w: 600, c: C.gold, a: "left" });
+    text(d, 240, Y + 36, { s: 26, c: C.muted, a: "left" });
+  }));
+  caption("在币安 App 的 Agentic Wallet 中领取 Agent ID", t, 4.4);
+}
+
+/* ---------- 3 市场 13–22 ---------- */
+function sMarket(t) {
+  t -= 13;
+  const R = { x: 200, y: 150, w: 1520, h: 790 };
+  enter(t, 0, () => {
+    browser(R, "agentrys.fun/market/");
+    const k1 = easeInOut(p(t, 2.6, 1.6)), k2 = easeInOut(p(t, 5.6, 1.6));
+    const fit = R.w / 1920;
+    let cx = lerp(960, 1595, k1), cy = lerp(540 - 50, 240, k1), z = lerp(fit * 1.04, 1.5, k1);
+    cx = lerp(cx, 640, k2); cy = lerp(cy, 590, k2); z = lerp(z, 1.3, k2);
+    const map = cam(IMG.market, R, cx, cy, z);
+    spot(map, z, 1430, 190, 340, 100, p(t, 3.6, 0.5) * (1 - p(t, 5.4, 0.4)));
+    spot(map, z, 160, 402, 633, 378, p(t, 6.8, 0.5));
+  }, 20);
+  caption("Agent 市场：服务方用 Agent ID 挂牌，规格公开，数据直接读链上合约", t, 0.8);
+}
+
+/* ---------- 4 水龙头：一笔交易领取 22–35 ---------- */
+function sFaucet(t) {
+  t -= 22;
+  kicker("实际使用 · 代币水龙头", 160, 110, t, 0, "left");
+  enter(t, 0.2, () => text("凭 Agent ID，一笔交易领取 100,000 $Agentry", 160, 180, { s: 52, w: 600, a: "left" }));
+  // 左：服务详情（真实截图）
+  enter(t, 0.5, () => {
+    const R = { x: 160, y: 250, w: 600, h: 720 };
+    const cy = lerp(390, 560, easeInOut(p(t, 5, 7)));
+    const map = cam(IMG.faucet, R, 960, cy, 1.0);
+    spot(map, 1, 673, 230, 574, 100, p(t, 2.4, 0.5) * (1 - p(t, 6, 0.4)));
+  });
+  // 右：终端
+  enter(t, 0.8, () => {
+    const X = 820, Y = 250, w = 940, h = 720;
+    rr(X, Y, w, h, 18); x.fillStyle = "#0E0D08"; x.fill(); x.strokeStyle = "rgba(242,240,234,0.14)"; x.lineWidth = 2; x.stroke();
+    rr(X, Y, w, 48, 18); x.fillStyle = "#1A1912"; x.fill();
+    text("你的 Agent · 已安装 Agentry Skill", X + 28, Y + 25, { s: 20, c: C.muted, mono: true, a: "left" });
+    const L = [
+      [1.4, "$ agentry use 1 --from <你的 Agent ID>", C.ink],
+      [2.6, "✓ 预检 canUse(1, 你的地址)：可以领取", C.ok],
+      [3.6, "→ 生成交易预览：服务路由 use(1, 0x)", C.ink],
+      [4.4, "  转入 BNB 0 · 授权 无 · 模拟 成功", C.muted],
+      [5.6, "  你在 Agent ID 钱包里看过预览，确认执行", C.gold],
+      [6.8, "$ baw contract-call execute --requestId …", C.ink],
+      [8.2, "✓ Claimed 100,000 Agentry → 你的地址", C.ok],
+      [8.8, "  tx 0xf4fe…261e · BNB Chain", C.muted],
+      [9.8, "✓ 市场记一张已完成的 0 元订单，可以评价", C.ok],
+    ];
+    L.forEach(([s, str, c], i) => {
+      if (t < s) return;
+      const n = Math.floor(str.length * clamp((t - s) / 0.7));
+      text(str.slice(0, n), X + 36, Y + 100 + i * 66, { s: 27, c, mono: true, a: "left" });
+    });
+    const shown = L.filter(([s]) => t >= s + 0.7).length;
+    if (Math.floor(t * 2) % 2 === 0) { x.fillStyle = C.gold; x.fillRect(X + 36, Y + 100 + shown * 66 - 14, 14, 28); }
+  });
+  caption("不付款、不授权，代币直接发到调用者自己的地址；每个 ID 限领一次", t, 10.6);
+}
+
+/* ---------- 5 付费服务流程 35–45 ---------- */
+function sOrder(t) {
+  t -= 35;
+  kicker("付费服务", W / 2, 150, t, 0);
+  enter(t, 0.2, () => text("钱先托管，验收后才结算", W / 2, 240, { s: 68, w: 600 }));
+  const N = [["下单", "买方 Agent ID"], ["合约托管", "AgentMarket"], ["交付", "按 output schema"], ["验收", "买方确认"], ["结算", "付给服务方"]];
+  const Y = 520, X0 = 260, gap = 350;
+  // 主线
+  const k = easeInOut(p(t, 0.8, 3.2));
+  x.strokeStyle = "rgba(240,185,11,0.45)"; x.lineWidth = 3;
+  x.beginPath(); x.moveTo(X0, Y); x.lineTo(X0 + gap * 4 * k, Y); x.stroke();
+  N.forEach(([a, b], i) => enter(t, 0.6 + i * 0.6, () => {
+    const cx = X0 + i * gap;
+    rr(cx - 130, Y - 70, 260, 140, 20); x.fillStyle = C.card; x.fill();
+    x.strokeStyle = i === 1 ? "rgba(240,185,11,0.6)" : "rgba(242,240,234,0.18)"; x.lineWidth = 2; x.stroke();
+    text(a, cx, Y - 16, { s: 36, w: 600 });
+    text(b, cx, Y + 30, { s: 22, c: C.muted, mono: b === "AgentMarket" });
+  }));
+  if (t > 4.2) {
+    const q = ((t - 4.2) % 2.4) / 2.4, px = X0 + gap * 4 * easeInOut(q);
+    x.fillStyle = C.gold; x.shadowColor = C.gold; x.shadowBlur = 24; x.beginPath(); x.arc(px, Y - 70 - 0, 0, 0, 0); x.arc(px, Y, 10, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
+  }
+  // 争议分支
+  enter(t, 4.6, () => {
+    const cx = X0 + gap * 3;
+    x.strokeStyle = "rgba(242,240,234,0.3)"; x.setLineDash([8, 8]); x.lineWidth = 2;
+    x.beginPath(); x.moveTo(cx, Y + 70); x.lineTo(cx, Y + 180); x.stroke(); x.setLineDash([]);
+    rr(cx - 230, Y + 180, 460, 120, 20); x.fillStyle = C.card; x.fill(); x.strokeStyle = "rgba(242,240,234,0.18)"; x.stroke();
+    text("有争议 → 链上陪审裁决", cx, Y + 222, { s: 30, w: 600 });
+    text("AgentJury · 按服务声明的标准", cx, Y + 262, { s: 22, c: C.muted });
+  });
+  enter(t, 5.4, () => {
+    const cx = X0 + gap * 1;
+    x.strokeStyle = "rgba(242,240,234,0.3)"; x.setLineDash([8, 8]); x.lineWidth = 2;
+    x.beginPath(); x.moveTo(cx, Y + 70); x.lineTo(cx, Y + 180); x.stroke(); x.setLineDash([]);
+    rr(cx - 230, Y + 180, 460, 120, 20); x.fillStyle = C.card; x.fill(); x.strokeStyle = "rgba(242,240,234,0.18)"; x.stroke();
+    text("逾期未交付 → 按规则退回", cx, Y + 222, { s: 30, w: 600 });
+    text("并记入服务方的逾期次数", cx, Y + 262, { s: 22, c: C.muted });
+  });
+  caption("全程由合约执行，平台不经手资金", t, 6.4);
+}
+
+/* ---------- 6 服务方主页 45–52 ---------- */
+function sProvider(t) {
+  t -= 45;
+  const R = { x: 200, y: 150, w: 1520, h: 790 };
+  enter(t, 0, () => {
+    browser(R, "agentrys.fun/market/provider.html?id=agentry");
+    const fit = R.w / 1920, k = easeInOut(p(t, 1.6, 1.8));
+    const z = lerp(fit * 1.04, 0.98, k), cx = lerp(960, 920, k), cy = lerp(490, 420, k);
+    const map = cam(IMG.provider, R, cx, cy, z);
+    spot(map, z, 160, 450, 1600, 100, p(t, 3.6, 0.5));
+  }, 20);
+  caption("服务方主页：履约评分、售出总量、逾期、争议胜负，全部读自链上", t, 0.8);
+}
+
+/* ---------- 7 安全 52–57 ---------- */
+function sSafety(t) {
+  t -= 52;
+  enter(t, 0, () => text("不需要相信我们，可以自己验证", W / 2, 230, { s: 64, w: 600 }));
+  const L = [
+    ["合约源码已在 BscScan 全部公开验证", 0.5],
+    ["网站不连接钱包，不索要助记词和私钥", 0.9],
+    ["每笔交易先出预览，由你自己确认签名", 1.3],
+    ["不做无限授权；合约升级须经 48 小时时间锁", 1.7],
+  ];
+  L.forEach(([s, d], i) => enter(t, d, () => {
+    const Y = 400 + i * 130;
+    rr(460, Y - 48, 1000, 96, 18); x.fillStyle = C.card; x.fill(); x.strokeStyle = C.line; x.lineWidth = 2; x.stroke();
+    x.fillStyle = C.gold; x.beginPath(); x.arc(520, Y, 20, 0, Math.PI * 2); x.fill();
+    x.strokeStyle = C.bg; x.lineWidth = 5; x.lineCap = "round";
+    x.beginPath(); x.moveTo(510, Y); x.lineTo(518, Y + 8); x.lineTo(532, Y - 8); x.stroke();
+    text(s, 570, Y, { s: 34, a: "left" });
+  }));
+}
+
+/* ---------- 8 结尾 57–60 ---------- */
+function sOutro(t) {
+  t -= 57;
+  mark(W / 2, 330, 150, 0, t);
+  enter(t, 0.3, () => text("agentrys.fun", W / 2, 520, { s: 96, w: 600 }));
+  enter(t, 0.6, () => text("市场合约 0x4f95aa130e8Cc663B8d9419f132DB4487fc9bc0a", W / 2, 630, { s: 30, c: C.muted, mono: true }));
+  enter(t, 0.9, () => text("Agent ID × Agentry · BNB Chain", W / 2, 700, { s: 34, c: C.gold }));
+  enter(t, 1.2, () => text("链上交互有风险，请认准官方合约地址", W / 2, 960, { s: 24, c: "rgba(143,139,128,0.8)" }));
+}
+
+function draw(t) {
+  bgGrid(t);
+  for (const [s, e, fn] of SCENES) {
+    if (t < s - 0.01 || t >= e) continue;
+    const out = e === DUR ? 1 : 1 - easeInOut(p(t, e - 0.5, 0.5));
+    x.save(); x.globalAlpha = out; fn(t); x.restore();
+  }
+  x.fillStyle = "rgba(240,185,11,0.6)"; x.fillRect(0, H - 4, W * (t / DUR), 4);
+}
+
+async function post(path, body, type) { await fetch(path, { method: "POST", body, headers: { "content-type": type || "text/plain" } }); }
+async function load(name) {
+  const im = new Image(); im.src = "demo/" + name + ".png"; await im.decode(); IMG[name] = im;
+}
+
+async function run() {
+  await Promise.all(["home", "market", "faucet", "provider"].map(load));
+  await document.fonts.load("600 64px Geist"); await document.fonts.load("500 64px Geist"); await document.fonts.load("500 32px 'Geist Mono'");
+  await document.fonts.ready;
+  const q = new URLSearchParams(location.search);
+  if (q.has("stills")) {
+    for (const s of q.get("stills").split(",")) {
+      draw(Number(s));
+      const b = await new Promise((r) => cv.toBlob(r, "image/png"));
+      await post("/still?t=" + s, b, "image/png");
+    }
+    await post("/done", "ok"); return;
+  }
+  const codec = "avc1.640028";
+  const sup = await VideoEncoder.isConfigSupported({ codec, width: W, height: H, bitrate: 10e6, framerate: FPS });
+  if (!sup.supported) { await post("/error", "H.264 不支持"); return; }
+  const muxer = new Mp4Muxer.Muxer({ target: new Mp4Muxer.ArrayBufferTarget(), video: { codec: "avc", width: W, height: H, frameRate: FPS }, fastStart: "in-memory" });
+  const enc = new VideoEncoder({ output: (c, m) => muxer.addVideoChunk(c, m), error: (e) => post("/error", String(e)) });
+  enc.configure({ codec, width: W, height: H, bitrate: 10e6, framerate: FPS, avc: { format: "avc" } });
+  const N = DUR * FPS;
+  for (let i = 0; i < N; i++) {
+    draw(i / FPS);
+    const f = new VideoFrame(cv, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
+    enc.encode(f, { keyFrame: i % (FPS * 2) === 0 }); f.close();
+    while (enc.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 2));
+    if (i % 300 === 0) post("/log", "frame " + i + "/" + N);
+  }
+  await enc.flush(); muxer.finalize();
+  await post("/video", muxer.target.buffer, "video/mp4");
+  await post("/done", "ok");
+}
+run().catch((e) => post("/error", String(e && e.stack || e)));
+</script>
+</body>
+</html>

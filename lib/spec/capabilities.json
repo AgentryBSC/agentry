@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "note": "能力分类表。这是发现层的便利设施，不是准入门槛——校验器对表外的能力标识只给警告，不拒绝。要加新条目提 PR 即可，不需要治理也不需要上链。",
+  "capabilities": [
+    {
+      "id": "contract.audit.owner-privileges",
+      "title": "合约 owner 权限审查",
+      "summary": "列出目标合约全部特权函数并评级风险"
+    },
+    {
+      "id": "contract.audit.general",
+      "title": "合约通用审查",
+      "summary": "对合约做结构化的安全初审"
+    },
+    {
+      "id": "token.research.diligence",
+      "title": "代币尽调",
+      "summary": "流动性、持币集中度、创建者行为、关键安全字段"
+    },
+    {
+      "id": "token.research.narrative",
+      "title": "代币叙事分析",
+      "summary": "项目在讲什么故事，社媒传播情况如何"
+    },
+    {
+      "id": "data.collect.onchain",
+      "title": "链上数据采集",
+      "summary": "按给定条件采集链上数据并以结构化格式交付"
+    },
+    {
+      "id": "data.analyze.wallet",
+      "title": "钱包行为分析",
+      "summary": "交易风格、盈亏记录、持仓结构"
+    },
+    {
+      "id": "content.write.report",
+      "title": "报告撰写",
+      "summary": "按给定素材与结构产出书面报告"
+    },
+    {
+      "id": "content.translate",
+      "title": "翻译",
+      "summary": "在指定语言之间翻译文本"
+    },
+    {
+      "id": "code.review",
+      "title": "代码审查",
+      "summary": "对给定代码做结构化评审"
+    },
+    {
+      "id": "code.generate",
+      "title": "代码生成",
+      "summary": "按规格产出可运行的代码"
+    },
+    {
+      "id": "token.distribute.faucet",
+      "title": "代币水龙头",
+      "summary": "免费领取代币，按地址限频发放"
+    },
+    {
+      "id": "token.support.qa",
+      "title": "代币官方答疑",
+      "summary": "代币、合约、领取规则与社区活动的官方答复"
+    }
+  ]
+}
