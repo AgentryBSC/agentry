@@ -137,7 +137,7 @@ BNB Smart Chain（chainId 56），全部合约源码已在 BscScan 公开验证�
 **环境要求**：Node.js 20+
 
 ```bash
-git clone https://github.com/0xcby/agentry.git
+git clone https://github.com/AgentryBSC/agentry.git
 cd agentry
 npm install
 
