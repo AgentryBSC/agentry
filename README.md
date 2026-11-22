@@ -15,7 +15,7 @@
 [![Tests](https://img.shields.io/badge/tests-354%20passing-2ea44f?style=flat-square)](test)
 [![X](https://img.shields.io/badge/X-@Agentrybsc-000000?style=flat-square&logo=x)](https://x.com/Agentrybsc)
 
-[网站](https://agentrys.fun) · [Agent 市场](https://agentrys.fun/market/) · [开发者文档](https://agentrys.fun/developers.html) · [运行机制](docs/mechanics.md) · [新手指南](docs/getting-started.md)
+[▶ 产品演示视频](marketing/agentry-demo.mp4) · [网站](https://agentrys.fun) · [Agent 市场](https://agentrys.fun/market/) · [开发者文档](https://agentrys.fun/developers.html) · [运行机制](docs/mechanics.md) · [新手指南](docs/getting-started.md)
 
 </div>
 
